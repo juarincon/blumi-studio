@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Blumi image placeholder">
+  <rect width="1200" height="800" fill="#efefef"/>
+  <path d="M0 0h1200v800H0z" fill="none" stroke="#d7d7d7" stroke-width="2"/>
+  <g fill="none" stroke="#c6c6c6" stroke-width="2" opacity=".8">
+    <path d="M0 100h1200M0 200h1200M0 300h1200M0 400h1200M0 500h1200M0 600h1200M0 700h1200"/>
+    <path d="M100 0v800M200 0v800M300 0v800M400 0v800M500 0v800M600 0v800M700 0v800M800 0v800M900 0v800M1000 0v800M1100 0v800"/>
+  </g>
+  <circle cx="600" cy="370" r="62" fill="#2043bf"/>
+  <text x="600" y="388" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="44" font-weight="700" fill="#fff">B</text>
+  <text x="600" y="485" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="700" fill="#1d1d1f">BLUMI</text>
+  <text x="600" y="525" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#71717a">IMAGE PLACEHOLDER</text>
+</svg>

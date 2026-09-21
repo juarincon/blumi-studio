@@ -1,0 +1,175 @@
+CONFIGURACION OPENAI PARA BLUMI STUDIO
+=====================================
+Actualizado para Blumi Studio v0.5.1
+Ruta publica acordada: blumi/blumi_studio/public
+
+OBJETIVO
+--------
+Blumi usa OpenAI solamente desde PHP/backend para analizar una imagen de referencia y devolver un componente estructurado (HTML, CSS, JS minimo, campos y tags).
+La API key NUNCA debe aparecer en JavaScript ni dentro de /public.
+
+PARTE A - LO QUE DEBES HACER EN LA PAGINA DE OPENAI
+----------------------------------------------------
+1. Entra a la plataforma de API de OpenAI:
+   https://platform.openai.com/
+
+2. Inicia sesion con la cuenta que administrara Blumi.
+
+3. Crea un proyecto de API para separar consumo y permisos.
+   En el selector de proyecto -> Create project / Crear proyecto.
+   Nombre recomendado: Blumi Studio
+   Si tu cuenta no permite crear proyectos, revisa que seas Owner de la organizacion. Tambien puedes usar temporalmente el Default project.
+
+4. Configura facturacion.
+   Ve a Billing / Facturacion y agrega un metodo de pago o creditos segun lo que muestre tu cuenta.
+   La suscripcion de ChatGPT y el consumo de API se administran por separado.
+
+5. Configura presupuesto y alertas.
+   Organization/Project Settings -> selecciona Blumi Studio -> Limits.
+   Recomendacion inicial para pruebas:
+   - presupuesto mensual pequeno, por ejemplo USD 5-10;
+   - alerta al 50%;
+   - alerta al 80%;
+   - alerta al 100%.
+   Revisa en el panel si el limite configurado es solo de alerta o limite estricto y ajustalo segun tu preferencia.
+
+6. Habilita el modelo que usara Blumi.
+   Project -> Limits / Model usage.
+   Modelo recomendado para este MVP:
+   gpt-5.6-terra
+   Es adecuado para analizar imagen + generar codigo manteniendo un balance entre capacidad y costo.
+
+7. Crea la API key.
+   Project Settings -> API Keys -> Create new secret key.
+   Nombre recomendado: blumi-studio-production
+
+8. Permisos de la key.
+   Para empezar puedes usar permisos completos del proyecto.
+   Cuando todo funcione, es mejor pasarla a Restricted y permitir solo lo necesario para Responses API.
+   Blumi v0.5.1 hace solicitudes a:
+   POST /v1/responses
+
+9. Copia la clave EN ESE MOMENTO y guardala de forma segura.
+   No la envies por WhatsApp, no la pegues en Git y no la pongas en archivos publicos.
+
+PARTE B - CONFIGURACION EN EL SERVIDOR
+--------------------------------------
+La estructura debe quedar aproximadamente asi:
+
+blumi/
+  blumi_studio/
+    .env                 <-- aqui va la API key
+    app/
+    config/
+    database/
+    storage/
+    public/              <-- unica carpeta publica
+
+NO pongas .env dentro de public.
+
+1. Copia .env.example y crea:
+   blumi/blumi_studio/.env
+
+2. Agrega o revisa estas variables:
+
+OPENAI_API_KEY=<tu_clave_openai>
+OPENAI_MODEL=gpt-5.6-terra
+OPENAI_TIMEOUT=90
+OPENAI_MAX_OUTPUT_TOKENS=12000
+
+3. Revisa APP_URL segun tu dominio. Ejemplo:
+APP_URL=https://tudominio.com/blumi/blumi_studio/public
+
+4. Asegurate de que PHP tenga cURL habilitado.
+   Blumi usa cURL directamente; no necesita instalar SDK de OpenAI.
+
+5. Asegurate de que PHP pueda escribir en:
+   public/uploads/component-references/
+   storage/components/
+
+PARTE C - PRUEBA REAL EN BLUMI
+------------------------------
+1. Inicia sesion en Blumi Studio.
+2. Abre Componentes.
+3. Selecciona "Desde imagen".
+4. Escoge una categoria existente, por ejemplo Hero o Navbar.
+5. Sube una captura JPG, PNG o WebP.
+6. Escribe opcionalmente que parte quieres conservar.
+7. Pulsa "Generar componente con Blumi AI".
+
+Resultado esperado:
+- la referencia queda guardada;
+- OpenAI analiza la imagen;
+- devuelve HTML/CSS/JS/schema/tags;
+- Blumi neutraliza la pieza usando sus reglas;
+- ves Referencia vs Componente Blumi;
+- revisas Desktop / Tablet / Mobile;
+- apruebas y queda bloqueado;
+- para cambiarlo se duplica y se crea una variante.
+
+PARTE D - QUE ENVIA BLUMI A OPENAI
+----------------------------------
+Blumi envia:
+- prompt con la Constitucion de Componentes Blumi;
+- categoria seleccionada;
+- instruccion opcional del usuario;
+- imagen como input_image codificada en base64.
+
+La llamada usa Responses API:
+POST https://api.openai.com/v1/responses
+
+La aplicacion usa store=false porque el componente final se guarda en nuestra propia base de datos y storage.
+
+PARTE E - ERRORES COMUNES
+-------------------------
+HTTP 401
+- La key es incorrecta, fue revocada o no se esta leyendo desde .env.
+
+HTTP 429
+- Limite de uso/rate limit, presupuesto, credito o facturacion.
+
+HTTP 400
+- Modelo no disponible para el proyecto o payload invalido.
+- Revisa que gpt-5.6-terra este habilitado en Project -> Limits / Model usage.
+
+Timeout
+- Sube OPENAI_TIMEOUT temporalmente a 120.
+- Comprueba conectividad saliente HTTPS del hosting.
+
+"La IA no devolvio un componente JSON valido"
+- La respuesta no cumplio el formato estructurado solicitado.
+- Reintenta la generacion. Si ocurre repetidamente, revisar el prompt/log del Component Factory.
+
+"Blumi no permite tamanos de fuente arbitrarios"
+- Es intencional. La generacion intento usar px/rem propios en font-size y fue rechazada.
+- Reintenta para que utilice los tokens --font-*.
+
+"El componente contiene colores fijos"
+- Tambien es intencional. La biblioteca no acepta colores copiados de la referencia.
+
+PARTE F - SEGURIDAD MINIMA
+--------------------------
+1. Agrega .env a .gitignore.
+2. Nunca muestres OPENAI_API_KEY al navegador.
+3. Si una key se filtra, revocala y crea una nueva.
+4. Usa una key exclusiva del proyecto Blumi Studio.
+5. Revisa Usage y Billing durante las primeras pruebas.
+6. Mantener public/ como DocumentRoot es lo ideal; el resto del proyecto no debe exponerse directamente.
+
+FUENTES OFICIALES DE OPENAI
+---------------------------
+Quickstart y API keys:
+https://platform.openai.com/docs/quickstart
+
+Modelos:
+https://platform.openai.com/docs/models
+
+Gestion de proyectos/API keys/limites:
+https://help.openai.com/en/articles/9186755
+
+Responses API:
+https://platform.openai.com/docs/api-reference/responses
+
+NOTA
+----
+Los nombres y ubicaciones exactas del dashboard pueden cambiar con el tiempo. Si ves una interfaz distinta, busca Project Settings, API Keys, Billing, Usage y Limits dentro de platform.openai.com.

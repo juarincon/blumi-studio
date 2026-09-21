@@ -1,0 +1,43 @@
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+
+# Runtime-generated content
+/storage/builds/*
+!/storage/builds/.gitkeep
+/storage/update-backups/*
+!/storage/update-backups/.gitkeep
+/storage/updates/*
+!/storage/updates/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/projects/*
+!/storage/projects/.gitkeep
+/storage/components/*
+!/storage/components/.gitkeep
+
+# User/project uploads and published builds
+/public/uploads/*
+!/public/uploads/.gitkeep
+/public/sites/*
+!/public/sites/.gitkeep
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs and local archives
+*.log
+*.zip
+*.tar
+*.tar.gz
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
